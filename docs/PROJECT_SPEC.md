@@ -74,12 +74,18 @@ Elements —
 
 ERD —
 
-![ERD v0.0.1](db.erd.png)
+![ERD v0.0.2](db.erd.png)
 
-ERD v0.0.1
+ERD v0.0.2
 
 # Tech Stack
 
 Frontend - React (NodeJS)
 Backend - FastAPI (Python)
 Database - PostgreSQL
+
+# APIs
+
+- /auth/login
+- /auth/register
+- /users/me
