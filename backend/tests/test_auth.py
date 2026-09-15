@@ -6,7 +6,7 @@ def test_register(client):
     }
 
     response = client.post(
-        '/register',
+        '/auth/register',
         json=user
     )
 
@@ -20,7 +20,7 @@ def test_register_conflict(client):
     }
 
     response = client.post(
-        '/register',
+        '/auth/register',
         json=user
     )
 
@@ -34,35 +34,35 @@ def test_login(client):
     }
 
     response = client.post(
-        '/login',
+        '/auth/login',
         data=user
     )
 
     assert response.status_code == 200
 
 
-def test_login_user_not_found(client):
+def test_login_invalid_username(client):
     user = {
-        'username': 'user_unknown',
+        'username': 'user_invalid',
         'password': '000000'
     }
 
     response = client.post(
-        '/login',
+        '/auth/login',
         data=user
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 
-def test_login_wrong_password(client):
+def test_login_invalid_password(client):
     user = {
         'username': 'user_shubham',
-        'password': '000000'
+        'password': 'password_invalid'
     }
 
     response = client.post(
-        '/login',
+        '/auth/login',
         data=user
     )
 
@@ -76,7 +76,7 @@ def test_token_authentication(client):
     }
 
     response = client.post(
-        '/login',
+        '/auth/login',
         data=user
     )
 
