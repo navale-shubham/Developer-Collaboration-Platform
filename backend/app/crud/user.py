@@ -1,20 +1,25 @@
 from sqlmodel import select
 
-from app.schemas.user import UserBase, UserRegister
-from app.models.user import User
-from app.crud.base import CRUDBase
+from app.models import User
+
+from .base import CRUDBase
 
 
 class CRUDUser(CRUDBase):
-    def create(self, user: UserRegister):
-        user = User(**user.model_dump())
-        user.hash_password()
-        self.db.add(user)
+    def create(self, name, username, password):
+        self.db.add(User(
+            name=name,
+            username=username,
+            password=password
+        ))
 
-    def exists(self, user: UserBase):
+    def exists(self, username: str):
         return bool(
-            self.db.exec(select(User).where(User.username == user.username)).first()
+            self.db.exec(select(User).where(User.username == username)).first()
         )
     
-    def get(self, user: UserBase):
-        return self.db.exec(select(User).where(User.username == user.username)).first()
+    def get_from_id(self, id):
+        return self.db.exec(select(User).where(User.id == id)).first()
+    
+    def get_from_username(self, username: str):
+        return self.db.exec(select(User).where(User.username == username)).first()

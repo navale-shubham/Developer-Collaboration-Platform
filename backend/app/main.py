@@ -2,8 +2,16 @@ from fastapi import FastAPI
 from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
 
+from app.models import *
+from app.schemas import *
+
 from app.core.database import engine
 from app.api.v1 import api
+
+
+UserResponse.model_rebuild()
+TeamResponse.model_rebuild()
+TeamInvitationResponse.model_rebuild()
 
 
 @asynccontextmanager
@@ -16,7 +24,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(api.app)
+app.include_router(
+    api.app,
+    prefix='/api'
+)
 
 
 @app.get("/")

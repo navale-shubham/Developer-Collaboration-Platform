@@ -5,4 +5,5 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 SECRET_KEY = os.getenv('SECRET_KEY')
 JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
 
+TOKEN_URL = 'api/v1/auth/login'
 ACCESS_TOKEN_EXPIRES_IN_MINUTES = 30

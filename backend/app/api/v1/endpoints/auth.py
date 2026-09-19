@@ -1,13 +1,12 @@
-from fastapi import APIRouter, status, Depends
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import Session
+from typing import Annotated
 
-from app.schemas.user import UserRegister, UserLogin
-from app.schemas.token import Token
-from app.crud.user import CRUDUser
-from app.core.database import get_db
+from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+
+from app.schemas import UserRegister, Token
+from app.crud import CRUDUser
 from app.core.security import create_access_token
+from app.dependencies import DBSession
 
 
 app = APIRouter(
@@ -16,42 +15,31 @@ app = APIRouter(
 
 
 @app.post('/register', status_code=status.HTTP_201_CREATED)
-def register(
-    user: UserRegister,
-    db: Session = Depends(get_db)
-):
-
+def register(user: UserRegister, db: DBSession):
     user_repo = CRUDUser(db)
 
-    if user_repo.exists(user):
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={'message': 'User with same email already exists.'}
-        )
+    if user_repo.exists(user.username):
+        raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail='User with same email already exists.'
+    )
     
-    user_repo.create(user)
+    user_repo.create(user.name, user.username, user.password)
 
 
 @app.post('/login', status_code=status.HTTP_200_OK)
 def login(
-    login_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    login_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: DBSession
 ):
-
     user_repo = CRUDUser(db)
+    user = user_repo.get_from_username(login_data.username)
 
-    user_login = UserLogin(
-        username=login_data.username,
-        password=login_data.password
-    )
-
-    user = user_repo.get(user_login)
-
-    if user and user.verify_password(user_login.password):
+    if user and user.verify_password(login_data.password):
         access_token = create_access_token(user.username)
         return Token(access_token=access_token, token_type="bearer")
     
-    return JSONResponse(
+    raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        content={'message': 'Invalid username or password.'}
+        detail='Invalid username or password.'
     )

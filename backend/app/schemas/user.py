@@ -2,14 +2,19 @@ from sqlmodel import SQLModel
 
 
 class UserBase(SQLModel):
+    name: str
     username: str
 
+    model_config = {"from_attributes": True}
+
+
 class UserRegister(UserBase):
-    name: str
     password: str
 
-class UserLogin(UserBase):
-    password: str
 
 class UserResponse(UserBase):
-    name: str
+    teams: list[TeamResponse]
+
+
+class UserViewResponse(UserBase):
+    pass

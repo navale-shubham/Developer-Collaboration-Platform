@@ -1,17 +1,11 @@
 import jwt
 from datetime import datetime, timedelta, timezone
 from pwdlib import PasswordHash
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 
-from app.core.config import SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRES_IN_MINUTES
-from app.crud.user import CRUDUser
-from app.core.database import get_db
-from app.schemas.user import UserBase, UserResponse
+from .config import SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRES_IN_MINUTES
 
 
 password_hash = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def hash_password(password: str):
@@ -43,23 +37,3 @@ def verify_access_token(token: str):
     
     except jwt.InvalidTokenError:
         return None, 'Error: Invalid token signature or payload.'
-
-
-def get_me(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-):
-    user_repo = CRUDUser(db)
-    
-    username, error = verify_access_token(token)
-
-    if username and (user := user_repo.get(
-        UserBase(username=username)
-    )):
-        return UserResponse(**user.model_dump(include={'username', 'name'}))
-    
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=error,
-        headers={'WWW-Authenticate': 'Bearer'}
-    )
