@@ -1,26 +1,16 @@
 from fastapi import FastAPI
-from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
 
-from app.models import *
 from app.schemas import *
-
-from app.core.database import engine
+from app.core.database import dispose_db, init_db
 from app.api.v1 import api
-
-
-UserResponse.model_rebuild()
-TeamResponse.model_rebuild()
-TeamInvitationResponse.model_rebuild()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    SQLModel.metadata.create_all(engine)
-    
+    init_db()
     yield
-
-    engine.dispose()
+    dispose_db()
 
 
 app = FastAPI(lifespan=lifespan)

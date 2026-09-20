@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlmodel import Session
 
 from app.core.config import TOKEN_URL
 from app.core.database import get_db
@@ -14,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
 
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated['Session', Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)]
 ):
     user_repo = CRUDUser(db)
     

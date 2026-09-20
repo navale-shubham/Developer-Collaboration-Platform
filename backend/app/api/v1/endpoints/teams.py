@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.dependencies import CurrentUser, DBSession, require_team_membership
 from app.crud import CRUDTeam, CRUDUser, CRUDTeamMember, CRUDTeamInvitation
 from app.schemas import TeamResponse, TeamInvitationResponse, UserViewResponse
+from app.models import Team
 
 
 app = APIRouter(

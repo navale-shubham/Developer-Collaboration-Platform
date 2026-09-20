@@ -6,7 +6,7 @@ from .base import CRUDBase
 
 
 class CRUDTeam(CRUDBase):
-    def create(self, name, owner_id):
+    def create(self, name: str, owner_id: int):
         team = Team(name=name, owner_id=owner_id)
         self.db.add(team)
         

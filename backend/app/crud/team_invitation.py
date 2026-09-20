@@ -6,14 +6,14 @@ from .base import CRUDBase
 
 
 class CRUDTeamInvitation(CRUDBase):
-    def create(self, team_id, invited_user_id, inviter_user_id):
+    def create(self, team_id: int, invited_user_id: int, inviter_user_id: int):
         self.db.add(TeamInvitation(
             team_id=team_id,
             invited_user_id=invited_user_id,
             inviter_user_id=inviter_user_id
         ))
     
-    def delete(self, team_id, invited_user_id):
+    def delete(self, team_id: int, invited_user_id: int):
         self.db.exec(
             delete(TeamInvitation).where(
                 TeamInvitation.team_id == team_id,
@@ -21,7 +21,7 @@ class CRUDTeamInvitation(CRUDBase):
             )
         )
     
-    def exists(self, team_id, invited_user_id):
+    def exists(self, team_id: int, invited_user_id: int):
         return bool(
             self.db.exec(
                 select(TeamInvitation).where(

@@ -6,7 +6,7 @@ from .base import CRUDBase
 
 
 class CRUDUser(CRUDBase):
-    def create(self, name, username, password):
+    def create(self, name: str, username: str, password: str):
         self.db.add(User(
             name=name,
             username=username,
@@ -18,7 +18,7 @@ class CRUDUser(CRUDBase):
             self.db.exec(select(User).where(User.username == username)).first()
         )
     
-    def get_from_id(self, id):
+    def get_from_id(self, id: int):
         return self.db.exec(select(User).where(User.id == id)).first()
     
     def get_from_username(self, username: str):

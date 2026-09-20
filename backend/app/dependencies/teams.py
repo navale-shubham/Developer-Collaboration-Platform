@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
+from sqlmodel import Session
 
 from app.core.database import get_db
 from app.dependencies.auth import get_current_user
@@ -10,8 +11,8 @@ from app.models import User
 
 def require_team_membership(
     team_slug: str,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
 ):
     team_repo = CRUDTeam(db)
     team_member_repo = CRUDTeamMember(db)
