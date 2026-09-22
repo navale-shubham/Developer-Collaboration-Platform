@@ -7,11 +7,14 @@ from .base import CRUDBase
 
 class CRUDTeamInvitation(CRUDBase):
     def create(self, team_id: int, invited_user_id: int, inviter_user_id: int):
-        self.db.add(TeamInvitation(
+        team_invitation = TeamInvitation(
             team_id=team_id,
             invited_user_id=invited_user_id,
             inviter_user_id=inviter_user_id
-        ))
+        )
+        
+        self.db.add(team_invitation)
+        return team_invitation
     
     def delete(self, team_id: int, invited_user_id: int):
         self.db.exec(

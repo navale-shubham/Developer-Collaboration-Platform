@@ -1,4 +1,6 @@
 import pytest
+from unittest.mock import patch
+
 from fastapi.testclient import TestClient
 from pathlib import Path
 
@@ -7,9 +9,12 @@ from app.main import app
 
 @pytest.fixture(scope="session", autouse=True)
 def setup():
-    yield
+    DATABASE_URL = Path('.') / 'tests' / 'temp_database.db'
+
+    with patch("app.config.DATABASE_URL", DATABASE_URL):
+        yield
     
-    (Path('.') / 'tests' / 'temp_database.db').unlink(missing_ok=True)
+    DATABASE_URL.unlink()
 
 
 @pytest.fixture

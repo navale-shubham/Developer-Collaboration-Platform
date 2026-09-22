@@ -1,45 +1,73 @@
 from typing import Annotated
 
 from fastapi import APIRouter, status, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
+from app.core.config import TOKEN_URL
+from app.models import User
 from app.schemas import UserRegister, Token
-from app.crud import CRUDUser
-from app.core.security import create_access_token
-from app.dependencies import DBSession
+from app.services.auth_service import (
+    authenticate_user, verify_current_user, verify_team_membership,
+    InvalidCredentialsError, UserNotVerifiedError, TeamNotFoundError
+)
+from app.services.user_service import register_new_user, UserExistsError
 
 
 app = APIRouter(
     prefix='/auth',
 )
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
 
-@app.post('/register', status_code=status.HTTP_201_CREATED)
-def register(user: UserRegister, db: DBSession):
-    user_repo = CRUDUser(db)
 
-    if user_repo.exists(user.username):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    try:
+        return verify_current_user(token)
+    
+    except UserNotVerifiedError:
         raise HTTPException(
-        status_code=status.HTTP_409_CONFLICT,
-        detail='User with same email already exists.'
-    )
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            headers={'WWW-Authenticate': 'Bearer'}
+        )
+
+
+def require_team_membership(team_slug: str, user: Annotated[User, Depends(get_current_user)]):
+    try:
+        return verify_team_membership(team_slug, user)
     
-    user_repo.create(user.name, user.username, user.password)
+    except TeamNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Team not found."
+        )
 
 
-@app.post('/login', status_code=status.HTTP_200_OK)
-def login(
-    login_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: DBSession
-):
-    user_repo = CRUDUser(db)
-    user = user_repo.get_from_username(login_data.username)
-
-    if user and user.verify_password(login_data.password):
-        access_token = create_access_token(user.username)
-        return Token(access_token=access_token, token_type="bearer")
+@app.post(
+    '/register',
+    status_code=status.HTTP_201_CREATED
+)
+def register(user: UserRegister):
+    try:
+        register_new_user(user.name, user.username, user.password)
     
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail='Invalid username or password.'
-    )
+    except UserExistsError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='User with same email already exists.'
+        )
+
+
+@app.post(
+    '/login',
+    status_code=status.HTTP_200_OK,
+    response_model=Token
+)
+def login(login_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    try:
+        return authenticate_user(login_data.username, login_data.password)
+    
+    except InvalidCredentialsError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Invalid username or password.'
+        )

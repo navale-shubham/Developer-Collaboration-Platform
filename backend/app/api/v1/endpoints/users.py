@@ -1,8 +1,12 @@
-from fastapi import APIRouter, status, HTTPException
+from typing import Annotated
 
-from app.dependencies import CurrentUser, DBSession
+from fastapi import APIRouter, status, HTTPException, Depends
+
+from app.services.user_service import get_user_by_username
 from app.schemas import UserResponse, UserViewResponse
-from app.crud import CRUDUser
+from app.models import User
+
+from .auth import get_current_user
 
 
 app = APIRouter(
@@ -15,7 +19,7 @@ app = APIRouter(
     status_code=status.HTTP_200_OK,
     response_model=UserResponse
 )
-def get_me(user: CurrentUser):
+def get_me(user: Annotated[User, Depends(get_current_user)]):
     return user
 
 
@@ -24,14 +28,11 @@ def get_me(user: CurrentUser):
     status_code=status.HTTP_200_OK,
     response_model=UserViewResponse
 )
-def get_user(username: str, db: DBSession):
-    user_repo = CRUDUser(db)
-
-    user = user_repo.get_from_username(username)
-    if user:
-        return user
+def get_user(username: str):
+    if not (user := get_user_by_username(username)):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found.'
+        )
     
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail='User not found.'
-    )
+    return user

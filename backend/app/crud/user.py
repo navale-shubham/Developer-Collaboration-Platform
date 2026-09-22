@@ -7,11 +7,14 @@ from .base import CRUDBase
 
 class CRUDUser(CRUDBase):
     def create(self, name: str, username: str, password: str):
-        self.db.add(User(
+        user = User(
             name=name,
             username=username,
             password=password
-        ))
+        )
+
+        self.db.add(user)
+        return user
 
     def exists(self, username: str):
         return bool(

@@ -7,7 +7,13 @@ from .base import CRUDBase
 
 class CRUDTeamMember(CRUDBase):
     def create(self, user_id: int, team_id: int):
-        self.db.add(TeamMember(user_id=user_id, team_id=team_id))
+        team_member = TeamMember(
+            user_id=user_id,
+            team_id=team_id
+        )
+        
+        self.db.add(team_member)
+        return team_member
     
     def get_all_team_ids(self, user_id: int):
         return self.db.exec(

@@ -13,7 +13,7 @@ class UserRegister(UserBase):
 
 
 class UserResponse(UserBase):
-    teams: list[TeamResponse]
+    pass
 
 
 class UserViewResponse(UserBase):

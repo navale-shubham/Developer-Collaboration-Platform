@@ -9,7 +9,7 @@ class User(SQLModel, table=True):
     username: str = Field(unique=True)
     password: str
 
-    teams: list[Team] = Relationship(back_populates='owner')
+    teams: list[Team] = Relationship(back_populates='owner', sa_relationship_kwargs={"lazy": "selectin"})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

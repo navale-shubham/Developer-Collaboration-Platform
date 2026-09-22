@@ -8,6 +8,10 @@ from .config import SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRES_IN_MINUTES
 password_hash = PasswordHash.recommended()
 
 
+class TokenVerificationError(Exception):
+    pass
+
+
 def hash_password(password: str):
     return password_hash.hash(password)
 
@@ -30,10 +34,7 @@ def create_access_token(sub: str):
 def verify_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        return payload['sub'], None
+        return payload['sub']
     
-    except jwt.ExpiredSignatureError:
-        return None, 'Error: The token has expired.'
-    
-    except jwt.InvalidTokenError:
-        return None, 'Error: Invalid token signature or payload.'
+    except jwt.ExpiredSignatureError, jwt.InvalidTokenError:
+        raise TokenVerificationError()

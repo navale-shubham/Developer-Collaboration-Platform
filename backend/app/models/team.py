@@ -10,7 +10,7 @@ class Team(SQLModel, table=True):
     size: int | None = Field(default=1)
     owner_id: int = Field(foreign_key='user.id')
 
-    owner: User = Relationship(back_populates='teams')
+    owner: User = Relationship(back_populates='teams', sa_relationship_kwargs={"lazy": "selectin"})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -74,9 +74,9 @@ Elements —
 
 ERD —
 
-![ERD v0.0.2](db.erd.png)
+![ERD v0.0.3](db.erd.png)
 
-ERD v0.0.2
+ERD v0.0.3
 
 # Tech Stack
 
@@ -86,6 +86,14 @@ Database - PostgreSQL
 
 # APIs
 
-- /auth/login
-- /auth/register
-- /users/me
+- POST  /auth/login
+- POST  /auth/register
+- GET   /users/me
+- GET   /users/{username}
+- GET   /teams
+- POST  /teams
+- GET   /teams/{team_slug}
+- GET   /teams/{team_slug}/invitations
+- POST  /teams/{team_slug}/invitations
+- GET   /teams/{team_slug}/members
+- POST  /teams/{team_slug}/members
