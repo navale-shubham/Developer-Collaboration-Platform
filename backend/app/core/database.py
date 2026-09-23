@@ -4,15 +4,11 @@ from functools import wraps
 from .config import DATABASE_URL
 
 
-engine = create_engine(DATABASE_URL)
-
-
-def init_db():
-    SQLModel.metadata.create_all(engine)
-
-
-def dispose_db():
-    engine.dispose()
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_pre_ping=True
+)
 
 
 def session(func):
